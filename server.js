@@ -8,11 +8,6 @@ app.use(express.static('.'));
 
 var Twitter = require('twitter');
 
-//maybe make these like
-//not plain text lol
-//what like env variables? 
-//oh good idea
-//TODO: that before you push
 var client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -30,7 +25,7 @@ var gmAPI = new GoogleMapsAPI(publicConfig);
 io.on('connection', function(socket){
 	
 	
-  var trackby = "cubs";
+  var trackby = "trump";
   var inaccurate = false;
 	
   var stream;
@@ -47,6 +42,10 @@ io.on('connection', function(socket){
 	inaccurate=check; 
 	stream.destroy();
 	stream = setup(stream, trackby, inaccurate);
+  });
+  socket.on('disconnect', function(){
+	console.log("user disconnected; closing stream")
+    stream.destroy();
   });
   
 });
@@ -102,14 +101,13 @@ function setup(stream, trackby, inaccurate) {
 	console.log(error)
 	throw error;
   });
+  
   return stream;
 	
 }
 
-
-// viewed at http://localhost:8080
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-http.listen(8080, "127.0.0.1");
+http.listen(8081);
