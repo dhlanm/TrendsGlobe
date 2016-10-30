@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<style type="text/css">
+	<!--formatting from:
+	    https://github.com/dataarts/webgl-globe/blob/master/globe-search/index.html -->
+    html {
+		height: 100%;
+    }
+    body {
+		margin: 0;
+		padding: 0;
+		background: #000000 url(/globe/loading.gif) center center no-repeat;
+		color: #ffffff;
+		font-family: sans-serif;
+		font-size: 13px;
+		line-height: 20px;
+		height: 100%;
+    }
+    #info {
+		font-size: 11px;
+		position: absolute;
+		bottom: 5px;
+		background-color: rgba(0, 0, 0, 0.8);
+		border-radius: 3px;
+		right: 10px;
+		padding: 10px;
+    }
+	#tweets {
+		float:right;
+		position: relative;
+		width: 20%;
+	}
+    a {
+		color: #aaa;
+		text-decoration: none;
+    }
+    a:hover {
+		text-decoration: underline;
+    }
+    .bull {
+		padding: 0px 5px;
+		color: #555;
+    }
+    #title {
+		position: absolute;
+		top: 20px;
+		width: 320px;
+		left: 20px;
+		background-color: rgba(0, 0, 0, 0.2);
+		font: 20px/20px Georgia;
+		padding: 15px;
+    }
+    .year {
+		font: 16px Georgia;
+		line-height: 26px;
+		height: 30px;
+		text-align: center;
+		float: left;
+		width: 90px;
+		color: rgba(255, 255, 255, 0.4);
+		cursor: pointer;
+		-webkit-transition: all 0.1s ease-out;
+    }
+    .year:hover, .year.active {
+		font-size: 23px;
+		color: #fff;
+    }
+    #ce span {
+		display: none;
+    }
+    #ce {
+		width: 107px;
+		height: 55px;
+		display: block;
+		position: absolute;
+		bottom: 15px;
+		left: 20px;
+		background: url(/globe/ce.png);
+    }
+	</style>
+</head>
+<body>
+	<div id='container' style=""></div>
+	<div id="info">
+	  The <a href="http://www.chromeexperiments.com/globe">WebGL Globe</a> is an
+	  open platform for visualizing geographic data. <span
+		class="bull">&bull;</span> <a href="https://github.com/dataarts/webgl-globe">Get
+	  the code</a> <span class="bull">&bull;</span> By the Google Data Arts Team</a>
+	</div>
+	<div id="tweets">
+		<p><b>Tweets:</b></p>
+		<ul></ul>
+	</div>
+	<div id="title">
+	  <span id="filterby"></span>
+	  <br>
+	  <form action="">
+        <input id="s"/><button>Filter</button>
+	  </form>
+	  <br>
+	  <span>Toggle less accurate location polling: </span><input type="checkbox"/>
+	</div>
+	<a id="ce" href="http://www.chromeexperiments.com/globe">
+	  <span>This is a Chrome Experiment</span>
+	</a>
+	<script type="text/javascript" src="./globe/third-party/Detector.js"></script>
+	<script type="text/javascript" src="./globe/third-party/three.min.js"></script>
+	<script type="text/javascript" src="./globe/globe.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script type="text/javascript">
+	
+	var filter = "cubs";
+	
+	$('#filterby').text("Filter Tweets by \""+filter+"\":");
+	
+	var container = document.getElementById( 'container' );
+
+	var globe = DAT.Globe(document.getElementById('container'), {colorFn: function(label){return new THREE.Color(0xffffff)}});
+	globe.animate();
+	document.body.style.backgroundImage = 'none';
+	var socket = io();
+	
+	$('form').submit(function(){
+      socket.emit('set', $('#s').val());
+	  filter=$('#s').val();
+      $('#s').val('');
+	  $('#container').empty();
+	  globe = DAT.Globe(document.getElementById('container'), {colorFn: function(label){return new THREE.Color(0xffffff)}});
+	  globe.animate();
+	  $('#filterby').text('Filter Tweets by "'+filter+'":');
+	  return false;
+    });
+	
+	$('#title input').change(function() {
+	  socket.emit('acc', this.checked);
+	});
+	
+	function addTweet(tweet) {
+		$("#tweets ul").append('<li>'+tweet+'</li>');
+		if ( $('#tweets ul li').length > 5 ) { 
+			$('#tweets ul li').first().remove();
+		}
+	}
+	
+	socket.on('tweet', function(tweet) {
+		console.log(tweet);
+		addTweet(tweet[2]);
+		globe.addData([tweet[0], tweet[1], .01], {format: 'legend'});
+		globe.createPoints();
+	});
+	</script>
+</body>
+</html>

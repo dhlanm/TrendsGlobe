@@ -1,0 +1,13 @@
+{
+  "name": "globec1-source",
+  "version": "0.0.1",
+  "description": "idk",
+  "dependencies": {
+    "aws-sdk": "^2.6.12",
+    "express": "^4.14.0",
+    "googlemaps": "^1.11.1",
+    "node-uuid": "^1.4.7",
+    "socket.io": "^1.5.1",
+    "twitter": "^1.4.0"
+  }
+}
